@@ -1,6 +1,6 @@
 [![GitHub stars](https://img.shields.io/github/stars/Sajjal/eMail-Server)](https://github.com/Sajjal/eMail-Server/stargazers)
 [![GitHub issues](https://img.shields.io/github/issues/Sajjal/eMail-Server)](https://github.com/Sajjal/eMail-Server/issues)
-![Website](https://img.shields.io/website?down_color=lightgrey&down_message=offline&up_color=blue&up_message=online&url=https%3A%2F%2Femail.mrsajjal.com)
+![Website](https://img.shields.io/website?down_color=lightgrey&down_message=offline&up_color=blue&up_message=online&url=https%3A%2F%2Fmail.mrsajjal.com)
 ![GitHub language count](https://img.shields.io/github/languages/count/Sajjal/eMail-Server)
 ![GitHub top language](https://img.shields.io/github/languages/top/Sajjal/eMail-Server)
 ![GitHub repo size](https://img.shields.io/github/repo-size/Sajjal/eMail-Server)

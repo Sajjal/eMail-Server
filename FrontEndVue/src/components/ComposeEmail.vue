@@ -1,6 +1,7 @@
 <template>
   <div>
-    <div class="heading">Compose New eMail</div>
+    <div v-if="status" class="heading">Reply To: {{ from }}</div>
+    <div v-else class="heading">{{ clearAll() }}Compose New eMail</div>
     <hr />
     <form @submit.prevent="handleSubmit">
       <input type="email" placeholder="From" v-model="data.from" required />
@@ -18,18 +19,26 @@ import getData from "../composables/getData";
 
 export default {
   emits: ["updateStatus"],
+  props: ["status", "from", "to", "subject", "message"],
 
   setup(props, context) {
     context.emit("updateStatus", true);
 
     const { error, sendMail } = getData();
-    const data = ref({ from: "", to: "", subject: "", message: "", date: Date.now() });
+    const data = ref({ from: props.to, to: props.from, subject: props.subject, message: props.message, date: Date.now() });
 
     function handleSubmit() {
       sendMail(data.value);
     }
 
-    return { data, handleSubmit };
+    function clearAll() {
+      data.value.from = "";
+      data.value.to = "";
+      data.value.subject = "";
+      data.value.message = "";
+    }
+
+    return { data, handleSubmit, clearAll };
   },
 };
 </script>

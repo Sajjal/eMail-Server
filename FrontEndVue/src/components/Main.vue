@@ -2,6 +2,7 @@
   <div class="actions">
     <div class="from"><strong>From:</strong> {{ emails[0].from }}</div>
     <div>
+      <span v-if="source === 'Inbox'" class="material-icons" @click="handleReply(emails[0])">reply</span>
       <span class="material-icons" @click="handleDelete()">{{ removeIcon }}</span>
     </div>
   </div>
@@ -13,6 +14,7 @@
 
 <script>
 import getData from "../composables/getData";
+import { useRouter } from "vue-router";
 
 export default {
   props: ["id", "source"],
@@ -21,6 +23,7 @@ export default {
   setup(props, context) {
     context.emit("updateStatus", true);
 
+    const router = useRouter();
     const { emails, error, load, toTrash } = getData();
 
     const id = props.id;
@@ -34,7 +37,20 @@ export default {
       toTrash("toTrash", { directory: source, id });
     }
 
-    return { emails, removeIcon, handleDelete };
+    function handleReply(email) {
+      router.push({
+        name: "Compose",
+        params: {
+          status: true,
+          from: email.from,
+          to: email.to,
+          subject: `RE: ${email.subject}`,
+          message: `\r\n\r\n\r\n\r\n<br/><br/>--------------------------------<br/><br/>\r\n\r\n${email.message}`,
+        },
+      });
+    }
+
+    return { emails, removeIcon, handleReply, handleDelete };
   },
 };
 </script>

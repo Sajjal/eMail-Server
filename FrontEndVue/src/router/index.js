@@ -52,6 +52,7 @@ const routes = [
     path: "/compose",
     name: "Compose",
     component: ComposeEmail,
+    props: true,
     beforeEnter: requireAuth,
   },
   {

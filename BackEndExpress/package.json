@@ -1,0 +1,26 @@
+{
+  "name": "s-and-d-email-server",
+  "version": "1.0.0",
+  "description": "Email Server With UI for SendGrid.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "Sajjal Neupane {https://mrsajjal.com}",
+  "license": "MIT",
+  "dependencies": {
+    "@sendgrid/mail": "^7.4.0",
+    "axios": "^0.21.1",
+    "cookie-parser": "^1.4.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "express-rate-limit": "^5.2.3",
+    "jsonwebtoken": "^8.5.1",
+    "monk": "^7.3.2",
+    "multer": "^1.4.2"
+  },
+  "devDependencies": {
+    "cors": "^2.8.5"
+  }
+}

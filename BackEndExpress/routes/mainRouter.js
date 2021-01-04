@@ -36,7 +36,7 @@ router.post("/inbox", upload.none(), async (req, res) => {
 
 router.post("/login", createAccountLimiter, async (req, res) => {
   //const response = await axios.post(`${process.env.ACCESS_URL}`, { service: "emailserver", uuid: req.body.accessCode });
-  //if (!response.data.status) return res.render("login.ejs", { message: "Invalid Access Code" });
+  //if (!response.data.status) return res.status(401).json({ Error: "Invalid Access Code" });
   if (req.body.accessCode != process.env.ACCESS_CODE) return res.status(401).json({ Error: "Invalid Access Code" });
 
   const accessToken = jwt.sign({ id: "mrsajjal" }, process.env.TOKEN_SECRET, { expiresIn: "7200s" }); //Two Hours

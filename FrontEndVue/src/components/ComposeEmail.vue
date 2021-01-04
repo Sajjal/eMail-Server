@@ -5,7 +5,7 @@
     <hr />
     <form @submit.prevent="handleSubmit">
       <input type="email" placeholder="From" v-model="data.from" required />
-      <input type="email" placeholder="To" v-model="data.to" required />
+      <input type="text" placeholder="To" v-model="data.to" required />
       <input type="text" placeholder="Subject" v-model="data.subject" required />
       <textarea placeholder="Message" v-model="data.message" required></textarea>
       <button type="submit">Send</button>
@@ -25,7 +25,7 @@ export default {
     context.emit("updateStatus", true);
 
     const { error, sendMail } = getData();
-    const data = ref({ from: props.to, to: props.from, subject: props.subject, message: props.message, date: Date.now() });
+    let data = ref({ from: props.to, to: props.from, subject: props.subject, message: props.message, date: Date.now() });
 
     function handleSubmit() {
       sendMail(data.value);
@@ -36,6 +36,7 @@ export default {
       data.value.to = "";
       data.value.subject = "";
       data.value.message = "";
+      data = ref({ from: "", to: "", subject: "", message: "", date: Date.now() });
     }
 
     return { data, handleSubmit, clearAll };

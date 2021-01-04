@@ -2,11 +2,11 @@
   <div class="actions">
     <div class="from"><strong>From:</strong> {{ emails[0].from }}</div>
     <div>
-      <span v-if="source === 'Inbox'" class="material-icons" @click="handleReply(emails[0])">reply</span>
+      <span v-if="source === 'Inbox'" class="material-icons reply" @click="handleReply(emails[0])">reply</span>
       <span class="material-icons" @click="handleDelete()">{{ removeIcon }}</span>
     </div>
   </div>
-  <p><strong>Sender IP:</strong> {{ emails[0].sender_ip }} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>Date:</strong>{{ new Date(emails[0].date) }}</p>
+  <p><strong>Sender IP:</strong> {{ emails[0].sender_ip }} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>Date: </strong>{{ moment(emails[0].date).format("llll") }}</p>
   <p><strong>To:</strong> {{ emails[0].to }}</p>
   <p><strong>Subject:</strong> {{ emails[0].subject }}</p>
   <p class="message" v-html="emails[0].message"></p>
@@ -15,6 +15,7 @@
 <script>
 import getData from "../composables/getData";
 import { useRouter } from "vue-router";
+import moment from "moment";
 
 export default {
   props: ["id", "source"],
@@ -50,7 +51,7 @@ export default {
       });
     }
 
-    return { emails, removeIcon, handleReply, handleDelete };
+    return { emails, removeIcon, handleReply, handleDelete, moment };
   },
 };
 </script>
@@ -82,5 +83,9 @@ button {
 }
 .material-icons:hover {
   color: red;
+  cursor: pointer;
+}
+.material-icons.reply:hover {
+  color: #2d8ec2;
 }
 </style>

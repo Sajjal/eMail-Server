@@ -4,6 +4,10 @@ const jwt = require("jsonwebtoken");
 const axios = require("axios");
 const multer = require("multer");
 
+//const Discord = require("discord.js");
+//const client = new Discord.Client();
+//client.login(process.env.DISCORD_BOT_KEY);
+
 const upload = multer({ limits: { fieldSize: 25 * 1024 * 1024 } });
 
 const { createAccountLimiter, verifyLogin } = require("../modules/verifyLogin");
@@ -31,6 +35,19 @@ router.post("/inbox", upload.none(), async (req, res) => {
     date: Date.now(),
   };
   await addData("inbox", message);
+
+  //Notify to Discord
+  /*
+  try {
+    const noticeToDiscordBot = new Discord.MessageEmbed()
+      .setColor("#0099ff")
+      .addFields({ name: message.subject, value: `From: \t ${message.from} \n To: \t ${message.to}` })
+      .setTimestamp()
+      .setFooter("Thank You!");
+    client.channels.cache.get(process.env.DISCORD_CHANNEL_ID).send(noticeToDiscordBot);
+  } catch (err) {}
+  */
+
   return res.sendStatus(200);
 });
 

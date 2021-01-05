@@ -4,7 +4,7 @@
   </div>
   <div v-else class="emailList" v-for="email in emails" :key="email.id">
     <p @click="handleClick(email._id)">
-      <strong>From:</strong> {{ email.from }} <span>{{ moment(emails[0].date).format("llll") }}</span> <br />
+      <strong>From:</strong> {{ email.from }} <span>{{ moment(email.date).format("llll") }}</span> <br />
       <strong>Subject:</strong> {{ email.subject }}
     </p>
   </div>

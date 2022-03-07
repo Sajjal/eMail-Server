@@ -77,7 +77,7 @@ After the initial setup, I found that it is not so pleasant experience to send a
 
 ## eMail-Server Flow Chart:
 
-<img src="https://github.com/Sajjal/eMail-Server/blob/master/FrontEndVue/Light_Vue_3/public/screenShots/flowChart.svg">
+<img src="https://github.com/Sajjal/eMail-Server/blob/master/FrontEndVue/public/screenShots/flowChart.svg">
 
 ---
 
@@ -85,25 +85,25 @@ After the initial setup, I found that it is not so pleasant experience to send a
 
 **Login Page:**
 
-<img src="https://github.com/Sajjal/eMail-Server/blob/master/FrontEndVue/Light_Vue_3/public/screenShots/login.png">
+<img src="https://github.com/Sajjal/eMail-Server/blob/master/FrontEndVue/public/screenShots/login.png">
 
 ---
 
 **Email List:**
 
-<img src="https://github.com/Sajjal/eMail-Server/blob/master/FrontEndVue/Light_Vue_3/public/screenShots/emailList.png">
+<img src="https://github.com/Sajjal/eMail-Server/blob/master/FrontEndVue/public/screenShots/emailList.png">
 
 ---
 
 **Compose New Email:**
 
-<img src="https://github.com/Sajjal/eMail-Server/blob/master/FrontEndVue/Light_Vue_3/public/screenShots/compose.png">
+<img src="https://github.com/Sajjal/eMail-Server/blob/master/FrontEndVue/public/screenShots/compose.png">
 
 ---
 
 **Display Email:**
 
-<img src="https://github.com/Sajjal/eMail-Server/blob/master/FrontEndVue/Light_Vue_3/public/screenShots/email.png">
+<img src="https://github.com/Sajjal/eMail-Server/blob/master/FrontEndVue/public/screenShots/email.png">
 
 ---
 

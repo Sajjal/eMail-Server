@@ -11,6 +11,7 @@
   "license": "MIT",
   "dependencies": {
     "@sendgrid/mail": "^6.5.5",
+    "axios": "^0.26.0",
     "cookie-parser": "^1.4.5",
     "discord.js": "^12.5.1",
     "dotenv": "^8.2.0",

@@ -73,6 +73,29 @@ const getServerData = () => {
         }
     };
 
+
+    const block = async(payload) => {
+        try {
+            await axios.post(`${server}block`, payload);
+        } catch (err) {
+            if (err.response.status == '401' || err.response.status == '429') {
+                store.dispatch('updateLoginStatus', false)
+                router.push({ name: "Login" });
+            }
+        }
+    };
+
+    const unblock = async(payload) => {
+        try {
+            await axios.post(`${server}unblock`, payload);
+        } catch (err) {
+            if (err.response.status == '401' || err.response.status == '429') {
+                store.dispatch('updateLoginStatus', false)
+                router.push({ name: "Login" });
+            }
+        }
+    };
+
     const fullEmail = async(payload) => {
         try {
             const response = await axios.post(`${server}search`, payload);
@@ -106,6 +129,11 @@ const getServerData = () => {
             const response = await axios.post(`${server}login`, payload);
             loginError.value = ''
             store.dispatch('updateLoginStatus', true)
+            store.dispatch('updateCurrentPage', 'Inbox');
+            store.dispatch('updateSkipLimit', { skip: 0, limit: 10 });
+            store.dispatch('updateCurrentMessage', {});
+            store.dispatch('updateEditMode', 'Compose');
+            store.dispatch('openCloseSidebar', false);
             router.push({ name: "Index" });
         } catch (err) {
             loginError.value = err.response.data.Error;
@@ -123,7 +151,7 @@ const getServerData = () => {
         }
     };
 
-    return { error, loginError, load, fullEmail, addStar, removeStar, markAsRead, toTrash, sendMail, login, logout };
+    return { error, loginError, load, fullEmail, addStar, removeStar, markAsRead, block, unblock, toTrash, sendMail, login, logout };
 };
 
 export default getServerData;

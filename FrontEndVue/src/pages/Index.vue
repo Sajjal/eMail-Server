@@ -63,12 +63,21 @@
         <div v-else v-for="email in emails" :key="email._id">
           <q-item>
             <q-item-section avatar>
-              <q-avatar :color="email.isNew ? 'green' : 'grey'" text-color="white"> {{ email.from ? email.from.replace(/[^a-z0-9,. ]/gi, '').charAt(0) : 'S' }} </q-avatar>
+              <q-avatar :color="email.isNew ? 'green' : 'grey'" text-color="white">
+                {{
+                  email.from
+                    ? email.from
+                        .replace(/[^a-z0-9,. ]/gi, '')
+                        .charAt(0)
+                        .toUpperCase()
+                    : 'S'
+                }}
+              </q-avatar>
             </q-item-section>
 
             <q-item-section @click="read(email._id)" style="cursor: pointer">
               <q-item-label lines="1">
-                <span :class="email.isNew ? 'text-purple text-bold' : 'text-grey-8 text-bold'"> {{ email.from ? email.from.split('<')[0].replace(/[^a-z0-9,. ]/gi, '') : '' }} </span>
+                <span :class="email.isNew ? 'text-purple text-bold' : 'text-grey-8 text-bold'"> {{ email.from ? email.from.split('<')[0].replace(/[^a-z0-9@,. ]/gi, '') : '' }} </span>
               </q-item-label>
               <q-item-label caption lines="2">
                 {{ date.formatDate(email.date, 'ddd, DD MMM YYYY,  hh:mm A') }} -- <span class="text-weight-bold"> {{ email.subject }} </span>
@@ -81,6 +90,7 @@
                   <q-tooltip> Star </q-tooltip>
                 </q-btn>
                 <q-btn class="gt-xs" size="12px" flat dense round icon="done" v-if="email.isNew" @click="readMark(email._id)"> <q-tooltip> Mark as Read </q-tooltip> </q-btn>
+                <q-btn v-if="store.state.currentPage == 'Inbox'" class="gt-xs" size="12px" flat dense round icon="block" @click="blockSender(email.from)"> <q-tooltip> Block this Sender </q-tooltip> </q-btn>
                 <q-btn v-if="store.state.currentPage != 'Trash'" class="gt-xs" size="12px" flat dense round icon="delete" @click="trash(email._id)"> <q-tooltip> Move to Trash </q-tooltip> </q-btn>
                 <q-btn v-if="store.state.currentPage == 'Trash'" class="gt-xs text-negative" size="12px" flat dense round icon="delete_forever" @click="trash(email._id)">
                   <q-tooltip> Delete Permanently </q-tooltip>
@@ -92,6 +102,9 @@
                     </q-item>
                     <q-item v-if="email.isNew" clickable @click="readMark(email._id)">
                       <q-item-section> <q-icon name="done" class="text-black" size="sm" clickable /> </q-item-section>
+                    </q-item>
+                    <q-item v-if="store.state.currentPage == 'Inbox'" clickable @click="blockSender(email.from)">
+                      <q-item-section> <q-icon name="block" class="text-black" size="sm" clickable /> </q-item-section>
                     </q-item>
                     <q-item clickable v-if="store.state.currentPage != 'Trash'" @click="trash(email._id)">
                       <q-item-section> <q-icon name="delete" class="text-black" size="sm" clickable /> </q-item-section>
@@ -113,7 +126,7 @@
   <div v-else class="sd-center">
     <q-item>
       <q-item-section>
-        <span class="text-bold" style="font-size: 18px"> {{ store.state.currentMessage.from ? store.state.currentMessage.from.split('<')[0].replace(/[^a-z0-9,. ]/gi, '') : '' }} </span>
+        <span class="text-bold" style="font-size: 18px"> {{ store.state.currentMessage.from ? store.state.currentMessage.from.split('<')[0].replace(/[^a-z0-9@,. ]/gi, '') : '' }} </span>
         <q-item-label caption class="q-mt-xs"> {{ date.formatDate(store.state.currentMessage.date, 'dddd, DD MMM YYYY,  hh:mm A') }} </q-item-label>
       </q-item-section>
 
@@ -164,6 +177,9 @@
               >
                 <q-tooltip> Star </q-tooltip>
               </q-btn>
+              <q-btn v-if="store.state.currentPage == 'Inbox'" class="gt-xs" size="12px" flat dense round icon="block" @click="blockSender(store.state.currentMessage.from)">
+                <q-tooltip> Block This Sender </q-tooltip>
+              </q-btn>
               <q-btn v-if="store.state.currentPage != 'Trash'" class="gt-xs" size="12px" flat dense round icon="delete" @click="trash(store.state.currentMessage._id)"> <q-tooltip> Move to Trash </q-tooltip> </q-btn>
               <q-btn v-if="store.state.currentPage == 'Trash'" class="gt-xs text-negative" size="12px" flat dense round icon="delete_forever" @click="trash(store.state.currentMessage._id)">
                 <q-tooltip> Delete Permanently </q-tooltip>
@@ -171,7 +187,10 @@
               <q-btn size="12px" flat dense round icon="more_vert" class="lt-sm">
                 <q-menu fit>
                   <q-item clickable @click="store.state.currentMessage.star ? unstar(store.state.currentMessage._id) : star(store.state.currentMessage._id)">
-                    <q-item-section> <q-icon name="star" :class="store.state.currentMessage.star ? 'gt-xs text-yellow-10' : 'gt-xs'" size="sm" /> </q-item-section>
+                    <q-item-section> <q-icon name="star" :class="store.state.currentMessage.star ? 'text-yellow-10' : 'text-black'" size="sm" clickable /> </q-item-section>
+                  </q-item>
+                  <q-item clickable v-if="store.state.currentPage == 'Inbox'" @click="blockSender(store.state.currentMessage.from)">
+                    <q-item-section> <q-icon name="block" class="text-black" size="sm" clickable /> </q-item-section>
                   </q-item>
                   <q-item clickable v-if="store.state.currentPage != 'Trash'" @click="trash(store.state.currentMessage._id)">
                     <q-item-section> <q-icon name="delete" class="text-black" size="sm" clickable /> </q-item-section>
@@ -208,12 +227,19 @@
             <q-avatar icon="report" color="red" text-color="white" />
           </q-item-section>
 
-          <q-item-section>
+          <q-item-section v-if="dialogMode == 'block'">
+            <q-item-label> Are You Sure to Block? </q-item-label>
+            <q-item-label caption lines="3">
+              You will not receive any emails from <span class="text-bold"> {{ emailToBlock }} </span>
+            </q-item-label>
+          </q-item-section>
+
+          <q-item-section v-if="dialogMode == 'trash'">
             <q-item-label v-if="store.state.currentPage != 'Trash'"> Are You Sure to Move it to the Trash? </q-item-label>
             <q-item-label v-if="store.state.currentPage == 'Trash'"> Are You Sure to Delete it Permanently? </q-item-label>
 
-            <q-item-label caption lines="1" v-if="store.state.currentPage != 'Trash'"> It will be auto-removed from Trash after a Week!</q-item-label>
-            <q-item-label caption lines="1" v-if="store.state.currentPage == 'Trash'"> You won't be able to see this Email again!</q-item-label>
+            <q-item-label caption lines="2" v-if="store.state.currentPage != 'Trash'"> It will be auto-removed from Trash after a Week!</q-item-label>
+            <q-item-label caption lines="2" v-if="store.state.currentPage == 'Trash'"> You won't be able to see this Email again!</q-item-label>
           </q-item-section>
         </q-item>
 
@@ -222,7 +248,8 @@
 
       <q-card-actions align="right">
         <q-btn flat label="Cancel" color="primary" @click="cancelTrash" />
-        <q-btn flat :label="store.state.currentPage == 'Trash' ? 'Delete' : 'Trash'" color="red" @click="confirmTrash" />
+        <q-btn flat v-if="dialogMode == 'trash'" :label="store.state.currentPage == 'Trash' ? 'Delete' : 'Trash'" color="red" @click="confirmTrash" />
+        <q-btn flat v-if="dialogMode == 'block'" label="Block" color="red" @click="confirmBlockSender" />
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -239,7 +266,7 @@ import getServerData from '../util/getServerData';
 const store = useStore();
 const router = useRouter();
 const $q = useQuasar();
-const { load, fullEmail, addStar, removeStar, markAsRead, toTrash } = getServerData();
+const { load, fullEmail, addStar, removeStar, markAsRead, block, toTrash } = getServerData();
 
 const isPC = $q.platform.is.mobile ? false : true;
 const emails = ref([]);
@@ -249,6 +276,8 @@ const readMessage = ref(false);
 const icons = { Inbox: 'mail', Starred: 'star', Sent: 'send', Trash: 'delete' };
 const error = ref('');
 const confirm = ref(false);
+const dialogMode = ref('');
+const emailToBlock = ref('');
 const msgToDelete = ref('');
 
 onMounted(async () => {
@@ -311,6 +340,7 @@ async function onSearch() {
 function trash(id) {
   msgToDelete.value = id;
   confirm.value = true;
+  dialogMode.value = 'trash';
 }
 
 async function confirmTrash() {
@@ -318,12 +348,12 @@ async function confirmTrash() {
   await toTrash({ directory: store.state.currentPage, id: msgToDelete.value });
   if (store.state.count < store.state.skip + 10) store.dispatch('updateSkipLimit', { skip: 0, limit: 10 });
   await refresh();
-  msgToDelete.value = '';
+  msgToDelete.value = dialogMode.value = '';
   confirm.value = false;
 }
 
 function cancelTrash() {
-  msgToDelete.value = '';
+  msgToDelete.value = emailToBlock.value = dialogMode.value = '';
   confirm.value = false;
 }
 
@@ -342,6 +372,19 @@ async function unstar(id) {
 async function readMark(id) {
   await markAsRead({ directory: store.state.currentPage, id });
   await refresh();
+}
+
+function blockSender(email) {
+  emailToBlock.value = email;
+  confirm.value = true;
+  dialogMode.value = 'block';
+}
+
+async function confirmBlockSender() {
+  await block({ email: emailToBlock.value, type: 'other_sender' });
+  emailToBlock.value = dialogMode.value = '';
+  confirm.value = false;
+  router.push({ name: 'BlockList' });
 }
 </script>
 

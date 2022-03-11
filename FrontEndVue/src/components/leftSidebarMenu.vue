@@ -33,6 +33,11 @@
         <q-item-section>Trash</q-item-section>
       </q-item>
       <q-separator spaced />
+      <q-item clickable @click="router.push({ name: 'BlockList' })">
+        <q-item-section avatar class="q-ml-lg"> <q-icon name="block" size="sm" /> </q-item-section>
+        <q-item-section>Block List</q-item-section>
+      </q-item>
+      <q-separator spaced />
       <q-item clickable @click="logout">
         <q-item-section avatar class="q-ml-lg"> <q-icon name="logout" size="sm" /> </q-item-section>
         <q-item-section>Logout</q-item-section>
@@ -59,6 +64,7 @@ function route(page) {
   store.dispatch('updateEditMode', 'Compose');
   store.dispatch('openCloseSidebar', false);
   if (page == 'Compose') return router.push({ name: 'Compose' });
+  if (page == 'Block List') return router.push({ name: 'BlockList' });
   router.push({ name: 'Index' });
 }
 </script>

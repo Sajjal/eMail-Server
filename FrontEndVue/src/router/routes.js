@@ -48,6 +48,13 @@ const routes = [{
                 component: () =>
                     import ('pages/Compose.vue')
             },
+            {
+                path: '/blocklist',
+                name: 'BlockList',
+                beforeEnter: requireAuth,
+                component: () =>
+                    import ('pages/BlockList.vue')
+            },
 
         ]
     },

@@ -2,10 +2,11 @@ const express = require("express");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
 const multer = require("multer");
+const axios = require('axios')
 
-//const Discord = require("discord.js");
-//const client = new Discord.Client();
-//client.login(process.env.DISCORD_BOT_KEY);
+// const Discord = require("discord.js");
+// const client = new Discord.Client();
+// client.login(process.env.DISCORD_BOT_KEY);
 
 const upload = multer({ limits: { fieldSize: 25 * 1024 * 1024 } });
 
@@ -34,26 +35,30 @@ router.post("/inbox", upload.none(), async(req, res) => {
         message: req.body.html.toString(),
         date: Date.now(),
     };
+
+    // Check if Sender/Receiving-Mailbox is in Block-list 
+    if (await checkBlockList(null, { $or: [{ "email": message.from }, { "email": message.to.includes('<') ? message.to.split('<')[1].split('>')[0] : message.to }] })) return res.sendStatus(200);
+
     await addData("inbox", message);
 
     //Notify to Discord
-    /*
-    try {
-      const noticeToDiscordBot = new Discord.MessageEmbed()
-        .setColor("#0099ff")
-        .addFields({ name: message.subject, value: `From: \t ${message.from} \n To:  \t ${message.to} \n Body: \t ${req.body.text}` })
-        .setTimestamp()
-        .setFooter("Thank You!");
-      client.channels.cache.get(process.env.DISCORD_CHANNEL_ID).send(noticeToDiscordBot);
-    } catch (err) {}
-    */
+
+    // try {
+    //     const noticeToDiscordBot = new Discord.MessageEmbed()
+    //         .setColor("#0099ff")
+    //         .addFields({ name: message.subject, value: `From: \t ${message.from} \n To:  \t ${message.to} \n Body: \t ${req.body.text}` })
+    //         .setTimestamp()
+    //         .setFooter("Thank You!");
+    //     client.channels.cache.get(process.env.DISCORD_CHANNEL_ID).send(noticeToDiscordBot);
+    // } catch (err) {}
+
 
     return res.sendStatus(200);
 });
 
 router.post("/login", createAccountLimiter, async(req, res) => {
-    //const response = await axios.post(`${process.env.ACCESS_URL}`, { service: "emailserver", uuid: req.body.accessCode });
-    //if (!response.data.status) return res.status(401).json({ Error: "Invalid Access Code" });
+    // const response = await axios.post(`${process.env.ACCESS_URL}`, { service: "emailserver", uuid: req.body.accessCode });
+    // if (!response.data.status) return res.status(401).json({ Error: "Invalid Access Code" });
 
     if (req.body.accessCode != process.env.ACCESS_CODE) return res.status(401).json({ Error: "Invalid Access Code" });
     const accessToken = jwt.sign({ id: "mrsajjal" }, process.env.TOKEN_SECRET, { expiresIn: "3600s" }); //One Hour
@@ -76,7 +81,7 @@ router.post("/emails", verifyLogin, async(req, res) => {
     else if (req.body.directory == "Sent") data = await getData("sent", projection, skip, limit);
     else if (req.body.directory == "Starred") data = await getData("starred", projection, skip, limit);
     else if (req.body.directory == "Trash") data = await getData("trash", projection, skip, limit);
-
+    else if (req.body.directory == "BlockList") data = await getData("blocklist", projection, skip, limit);
     return res.json(data);
 });
 
@@ -162,6 +167,20 @@ router.post("/markAsRead", verifyLogin, async(req, res) => {
     return res.sendStatus(200);
 });
 
+router.post("/block", verifyLogin, async(req, res) => {
+    if (!req.body.email && !req.body.type) return res.sendStatus(403);
+    if (await checkBlockList(req.body.email)) return res.sendStatus(200);
+    await addData("blocklist", { email: req.body.email, type: req.body.type, date: new Date() });
+    return res.sendStatus(200);
+});
+
+router.post("/unblock", verifyLogin, async(req, res) => {
+    if (!req.body.email && !req.body.id) return res.sendStatus(403);
+    if (!await checkBlockList(req.body.email)) return res.sendStatus(200);
+    await removeData("blocklist", req.body.id);
+    return res.sendStatus(200);
+});
+
 router.post("/logout", async(req, res) => {
     const token = req.cookies.accessToken;
     if (token) await expiredToken(token);
@@ -181,6 +200,16 @@ async function sendEmail(info) {
         await sgMail.send(email);
     } catch (error) {}
     return;
+}
+
+
+async function checkBlockList(email, multiple = null) {
+    if (!email && !multiple) return false
+    let isBlocked = {}
+    if (!multiple) isBlocked = await searchData('blocklist', { email });
+    if (multiple) isBlocked = await searchData('blocklist', multiple);
+    if (isBlocked.data && isBlocked.data.length) return true;
+    return false
 }
 
 module.exports = router;

@@ -77,7 +77,12 @@
 
             <q-item-section @click="read(email._id)" style="cursor: pointer">
               <q-item-label lines="1">
-                <span :class="email.isNew ? 'text-purple text-bold' : 'text-grey-8 text-bold'"> {{ email.from ? email.from.split('<')[0].replace(/[^a-z0-9@,. ]/gi, '') : '' }} </span>
+                <span v-if="store.state.currentPage == 'Sent'" :class="email.isNew ? 'text-purple text-bold' : 'text-grey-8 text-bold'"> {{ email.to ? email.to.split('<')[0].replace(/[^a-z0-9@,. ]/gi, '') : '' }} </span>
+                <span v-else :class="email.isNew ? 'text-purple text-bold' : 'text-grey-8 text-bold'"> {{ email.from ? email.from.split('<')[0].replace(/[^a-z0-9@,. ]/gi, '') : '' }} </span>
+              </q-item-label>
+              <q-item-label caption lines="1">
+                <span v-if="store.state.currentPage == 'Sent'">{{ email.from ? email.from.split('<')[0].replace(/[^a-z0-9@,. ]/gi, '') : '' }}</span>
+                <span v-else>{{ email.to ? email.to.split('<')[0].replace(/[^a-z0-9@,. ]/gi, '') : '' }}</span>
               </q-item-label>
               <q-item-label caption lines="2">
                 {{ date.formatDate(email.date, 'ddd, DD MMM YYYY,  hh:mm A') }} -- <span class="text-weight-bold"> {{ email.subject }} </span>
@@ -212,8 +217,16 @@
           </q-item-section>
         </q-item>
         <q-separator />
+        <div v-if="store.state.currentMessage.attachments && store.state.currentMessage.attachments.length">
+          <q-item>
+            <q-item-section v-for="file in store.state.currentMessage.attachments" :key="file.path">
+              <i :class="getClassWithColor(file.name)" @click="downloadFile(file)"> {{ file.name }} </i>
+            </q-item-section>
+          </q-item>
+        </div>
+        <q-separator v-if="store.state.currentMessage.attachments && store.state.currentMessage.attachments.length" />
         <q-responsive :ratio="1">
-          <div v-html="DOMPurify.sanitize(store.state.currentMessage.message)"></div>
+          <div v-html="DOMPurify.sanitize(store.state.currentMessage.message)" class="q-pt-md q-ml-md"></div>
         </q-responsive>
       </q-scroll-area>
     </q-list>
@@ -262,11 +275,12 @@ import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 import DOMPurify from 'dompurify';
 import getServerData from '../util/getServerData';
+import { getClassWithColor } from 'file-icons-js';
 
 const store = useStore();
 const router = useRouter();
 const $q = useQuasar();
-const { load, fullEmail, addStar, removeStar, markAsRead, block, toTrash } = getServerData();
+const { load, fullEmail, download, addStar, removeStar, markAsRead, block, toTrash } = getServerData();
 
 const isPC = $q.platform.is.mobile ? false : true;
 const emails = ref([]);
@@ -306,6 +320,10 @@ async function refresh() {
 async function read(id) {
   await fullEmail({ directory: store.state.currentPage, id });
   readMessage.value = true;
+}
+
+async function downloadFile(file) {
+  await download(file);
 }
 
 async function next() {
@@ -388,3 +406,12 @@ async function confirmBlockSender() {
 }
 </script>
 
+<style scoped>
+@import '../../node_modules/file-icons-js/css/style.css';
+i {
+  text-decoration: none;
+  color: #000;
+  font-size: 16px;
+  cursor: pointer;
+}
+</style>

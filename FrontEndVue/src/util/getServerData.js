@@ -25,6 +25,23 @@ const getServerData = () => {
         }
     };
 
+    const download = async(payload) => {
+        try {
+            const { data } = await axios.post(`${server}download`, payload, { responseType: 'blob' });
+            const link = document.createElement('a');
+            link.href = window.URL.createObjectURL(new Blob([data]));
+            document.body.appendChild(link);
+            link.download = payload.name
+            link.click();
+            return URL.revokeObjectURL(link.href)
+        } catch (err) {
+            if (err.response.status == '401' || err.response.status == '429') {
+                store.dispatch('updateLoginStatus', false)
+                router.push({ name: "Login" });
+            }
+        }
+    };
+
     const toTrash = async(payload) => {
         try {
             await axios.post(`${server}toTrash`, payload);
@@ -113,7 +130,7 @@ const getServerData = () => {
 
     const sendMail = async(payload) => {
         try {
-            await axios.post(`${server}sent`, payload);
+            await axios.post(`${server}sent`, payload, { headers: { "Content-Type": "multipart/form-data" } });
             store.dispatch('updateCurrentPage', 'Sent')
             router.push({ name: "Index" });
         } catch (err) {
@@ -151,7 +168,7 @@ const getServerData = () => {
         }
     };
 
-    return { error, loginError, load, fullEmail, addStar, removeStar, markAsRead, block, unblock, toTrash, sendMail, login, logout };
+    return { error, loginError, load, download, fullEmail, addStar, removeStar, markAsRead, block, unblock, toTrash, sendMail, login, logout };
 };
 
 export default getServerData;

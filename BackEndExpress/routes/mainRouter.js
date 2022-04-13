@@ -5,9 +5,9 @@ const multer = require("multer");
 const axios = require('axios')
 const fs = require("fs");
 
-// const Discord = require("discord.js");
-// const client = new Discord.Client();
-// client.login(process.env.DISCORD_BOT_KEY);
+const Discord = require("discord.js");
+const client = new Discord.Client();
+client.login(process.env.DISCORD_BOT_KEY);
 
 const { createAccountLimiter, verifyLogin } = require("../modules/verifyLogin");
 const { addData, getData, searchData, updateData, removeData, expiredToken } = require("../modules/dbConfig");
@@ -78,13 +78,14 @@ router.post("/authorize", verifyLogin, (req, res) => {
 });
 
 router.post("/inbox", upload.any(), async(req, res) => {
+    const emailBody = req.body && req.body.html ? req.body.html.toString() : req.body && req.body.text ? req.body.text.toString() : '';
     const message = {
         from: req.body.from,
         sender_ip: req.body.sender_ip,
         to: req.body.to,
         subject: req.body.subject,
         isNew: true,
-        message: req.body.html.toString(),
+        message: emailBody,
         date: Date.now(),
         attachments: [],
     };
@@ -103,29 +104,29 @@ router.post("/inbox", upload.any(), async(req, res) => {
     await addData("inbox", message);
 
     //Notify to Discord
-
-    // try {
-    //     const noticeToDiscordBot = new Discord.MessageEmbed()
-    //         .setColor("#0099ff")
-    //         .addFields({ name: message.subject, value: `From: \t ${message.from} \n To:  \t ${message.to} \n Body: \t ${req.body.text}` })
-    //         .setTimestamp()
-    //         .setFooter("Thank You!");
-    //     client.channels.cache.get(process.env.DISCORD_CHANNEL_ID).send(noticeToDiscordBot);
-    // } catch (err) {}
+    const msgBody = req.body && req.body.text ? req.body.text.toString().substring(0, 900) : 'Unable to read Email Body!'
+    try {
+        const noticeToDiscordBot = new Discord.MessageEmbed()
+            .setColor("#0099ff")
+            .addFields({ name: message.subject, value: `From: \t ${message.from} \n To:  \t ${message.to} \n Body: \t ${msgBody}` })
+            .setTimestamp()
+            .setFooter("Thank You!");
+        client.channels.cache.get(process.env.DISCORD_CHANNEL_ID).send(noticeToDiscordBot);
+    } catch (err) {}
 
 
     return res.sendStatus(200);
 });
 
 router.post("/login", createAccountLimiter, async(req, res) => {
-    // const response = await axios.post(`${process.env.ACCESS_URL}`, { service: "emailserver", uuid: req.body.accessCode });
-    // if (!response.data.status) return res.status(401).json({ Error: "Invalid Access Code" });
+    const response = await axios.post(`${process.env.ACCESS_URL}`, { service: "emailserver", uuid: req.body.accessCode });
+    if (!response.data.status) return res.status(401).json({ Error: "Invalid Access Code" });
 
-    if (req.body.accessCode != process.env.ACCESS_CODE) return res.status(401).json({ Error: "Invalid Access Code" });
+    //if (req.body.accessCode != process.env.ACCESS_CODE) return res.status(401).json({ Error: "Invalid Access Code" });
     const accessToken = jwt.sign({ id: "mrsajjal" }, process.env.TOKEN_SECRET, { expiresIn: "3600s" }); //One Hour
     //Save accessToken to Client's Browser Cookie and Redirect to Dashboard
-    return res.cookie("accessToken", accessToken).status(200).json({ Message: "You are Logged In !" });
-    //return res.cookie("accessToken", accessToken, { httpOnly: true, secure: true, sameSite: "strict" }).status(200).json({ Message: "You are Logged In !" });
+    //return res.cookie("accessToken", accessToken).status(200).json({ Message: "You are Logged In !" });
+    return res.cookie("accessToken", accessToken, { httpOnly: true, secure: true, sameSite: "strict" }).status(200).json({ Message: "You are Logged In !" });
 });
 
 router.post("/emails", verifyLogin, async(req, res) => {
